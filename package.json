@@ -1,5 +1,6 @@
 {
   "name": "vmtranslator",
+  "type": "module",
   "version": "1.0.0",
   "private": "true",
   "main": "main.js",
@@ -12,5 +13,8 @@
   "description": "",
   "devDependencies": {
     "vitest": "^2.1.5"
+  },
+  "dependencies": {
+    "n-readlines": "^1.0.1"
   }
 }
