@@ -10,18 +10,27 @@ const C_RETURN = "C_RETURN";
 const C_CALL = "C_CALL";
 const C_IF = "C_IF";
 
+const command = {
+  push() {
+    return C_PUSH;
+  },
+  pop() {
+    return C_POP;
+  },
+
+  // return, function, label, goto, call, if
+};
 export default class Parser {
   constructor(file) {
     this.fileLine = new nReadLines(file);
-    this.currentCommand = this.fileLine.next();
+    this.currentCommand = this.fileLine.next().split(" ");
   }
   commandType() {
-    if (this.currentCommand.includes("push")) {
-      return C_PUSH;
+    let type = command[this.currentCommand[0]];
+    if (type) {
+      return type();
     }
-    if (this.currentCommand.includes("add")) {
-      return C_ARITHMETIC;
-    }
+    return C_ARITHMETIC;
   }
   #nextLine;
   hasMoreCommand() {
@@ -30,14 +39,30 @@ export default class Parser {
       nextLine = this.fileLine.next();
     }
     if (nextLine) {
-      this.#nextLine = nextLine;
+      this.#nextLine = nextLine.split(" ");
       return true;
     }
     return false;
   }
   advance() {
-    // TODO: call next
     this.currentCommand = this.#nextLine;
+  }
+  arg1() {
+    if (this.commandType() === C_ARITHMETIC) {
+      return this.currentCommand[0];
+    }
+    return this.currentCommand[1];
+  }
+  arg2() {
+    if (this.commandType() === C_ARITHMETIC) {
+      return;
+    }
+    if (this.commandType() === C_PUSH) {
+      return +this.currentCommand[2];
+    }
+    if (this.commandType() === C_POP) {
+      return +this.currentCommand[2];
+    }
   }
 }
 // Parser

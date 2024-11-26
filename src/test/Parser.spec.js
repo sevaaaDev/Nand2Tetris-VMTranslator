@@ -16,19 +16,19 @@ vi.mock("n-readlines", () => {
 describe("Parser", () => {
   it("advance to next command", () => {
     const parser = new Parser(["push constant 1", "add"]);
-    expect(parser.currentCommand).toBe("push constant 1");
+    expect(parser.currentCommand).toEqual(["push", "constant", "1"]);
     if (parser.hasMoreCommand()) {
       parser.advance();
     }
-    expect(parser.currentCommand).toBe("add");
+    expect(parser.currentCommand).toEqual(["add"]);
   });
   it("advance to next command, not line", () => {
     const parser = new Parser(["push constant 1", "", "add"]);
-    expect(parser.currentCommand).toBe("push constant 1");
+    expect(parser.currentCommand).toEqual(["push", "constant", "1"]);
     if (parser.hasMoreCommand()) {
       parser.advance();
     }
-    expect(parser.currentCommand).toBe("add");
+    expect(parser.currentCommand).toEqual(["add"]);
   });
   it("return correct command type", () => {
     const parser = new Parser(["push constant 1", "add"]);
@@ -43,9 +43,23 @@ describe("Parser", () => {
     parser.advance();
     expect(parser.hasMoreCommand()).toBe(false);
   });
-  it.todo("return the correct arg1");
-  it.todo("return the correct arg2");
-  it.todo("return the correct arg1 if type unsupported");
+  it("return the correct arg1", () => {
+    const parser = new Parser(["push local 2"]);
+    expect(parser.arg1()).toBe("local");
+  });
+  it("return the correct arg2", () => {
+    const parser = new Parser(["push local 2"]);
+    // push = command
+    // local = arg 1
+    // 2 = arg 2
+    expect(parser.arg2()).toBe(2);
+  });
+  it("return the correct arg1 if type arithmetic", () => {
+    const parser = new Parser(["add"]);
+    // if arithmetic
+    // arg1 = command
+    expect(parser.arg1()).toBe("add");
+  });
   it.todo("return the correct arg2 if type unsupported");
 });
 
