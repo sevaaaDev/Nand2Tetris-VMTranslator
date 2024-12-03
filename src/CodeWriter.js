@@ -65,7 +65,7 @@ M=M+1
     }
     if (segment === "static") {
       return `// push ${segment} ${index}
-@${fileName}.${index}
+@${fileName.replace(".asm", "")}.${index}
 D=M
 
 @SP
@@ -123,7 +123,7 @@ M=M+1
   C_POP(segment, index, fileName) {
     if (segment === "static") {
       return `// pop ${segment} ${index}
-@${fileName}.${index}
+@${fileName.replace(".asm", "")}.${index}
 D=A
 @R15
 M=D
@@ -230,8 +230,7 @@ M=D&M
   or() {
     return `// or
 @SP
-M=M-1
-A=M
+AM=M-1
 D=M
 @SP
 A=M-1
@@ -241,16 +240,14 @@ M=D|M
   not() {
     return `// not
 @SP
-M=M-1
-A=M
+A=M-1
 M=!M
 `;
   },
   neg() {
     return `// neg
 @SP
-M=M-1
-A=M
+A=M-1
 M=-M
 `;
   },
@@ -263,16 +260,19 @@ D=M
 @SP
 A=M
 D=D-M
-@EQ1
+@EQ${obj.eqCount}
 D;JEQ
 @SP
 A=M-1
 M=0
+@END_EQ${obj.eqCount}
+0;JMP
 
-(EQ${obj.eqCount++})
+(EQ${obj.eqCount})
 @SP
 A=M-1
 M=-1
+(END_EQ${obj.eqCount++})
 `;
   },
   lt(obj) {
@@ -284,16 +284,19 @@ D=M
 @SP
 A=M
 D=D-M
-@LT1
+@LT${obj.ltCount}
 D;JLT
 @SP
 A=M-1
 M=0
+@END_LT${obj.ltCount}
+0;JMP
 
-(LT${obj.ltCount++})
+(LT${obj.ltCount})
 @SP
 A=M-1
 M=-1
+(END_LT${obj.ltCount++})
 `;
   },
   gt(obj) {
@@ -305,16 +308,19 @@ D=M
 @SP
 A=M
 D=D-M
-@GT1
+@GT${obj.gtCount}
 D;JGT
 @SP
 A=M-1
 M=0
+@END_GT${obj.gtCount}
+0;JMP
 
-(GT${obj.gtCount++})
+(GT${obj.gtCount})
 @SP
 A=M-1
 M=-1
+(END_GT${obj.gtCount++})
 `;
   },
 };
