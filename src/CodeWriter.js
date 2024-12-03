@@ -1,3 +1,31 @@
+import { appendFileSync } from "fs";
+export default class CodeWriter {
+  constructor(OutFile) {
+    this.fileName = OutFile;
+  }
+  writePushPop(command, segment, index) {
+    let line = getAssembly[command](segment, index, this.fileName);
+    try {
+      appendFileSync(this.fileName, line, "utf-8");
+    } catch (err) {
+      throw err;
+    }
+    return line;
+  }
+  writeArithmetic(command) {
+    let line = getAssemblyArithmetic[command](this);
+    try {
+      appendFileSync(this.fileName, line, "utf-8");
+    } catch (err) {
+      throw err;
+    }
+    return line;
+  }
+  eqCount = 0;
+  ltCount = 0;
+  gtCount = 0;
+}
+
 const getSegment = {
   local() {
     return "LCL";
@@ -21,7 +49,7 @@ const getSegment = {
 };
 
 const getAssembly = {
-  push(segment, index) {
+  C_PUSH(segment, index, fileName) {
     if (segment === "constant") {
       return `// push ${segment} ${index}
 @${index}
@@ -36,9 +64,8 @@ M=M+1
 `;
     }
     if (segment === "static") {
-      // TODO: change foo
       return `// push ${segment} ${index}
-@Foo.${index}
+@${fileName}.${index}
 D=M
 
 @SP
@@ -93,11 +120,10 @@ M=D
 M=M+1
 `;
   },
-  pop(segment, index) {
+  C_POP(segment, index, fileName) {
     if (segment === "static") {
-      //TODO: change foo
       return `// pop ${segment} ${index}
-@Foo.${index}
+@${fileName}.${index}
 D=A
 @R15
 M=D
@@ -167,7 +193,6 @@ M=D
 `;
   },
 };
-// TODO:   neg eq   gt lt
 const getAssemblyArithmetic = {
   add() {
     return `// add
@@ -183,31 +208,113 @@ M=D+M
   sub() {
     return `// sub
 @SP
-M=M-1
-A=M
+AM=M-1
 D=M
 @SP
 A=M-1
 M=D-M
+M=-M
 `;
   },
-};
-export default class CodeWriter {
-  constructor() {}
-  writePushPop(command, segment, index) {
-    return getAssembly[command](segment, index);
-  }
-  writeArithmetic(command) {
-    if (command === "add") {
-      return `// add
+  and() {
+    return `// and
 @SP
 M=M-1
 A=M
 D=M
 @SP
 A=M-1
-M=D+M
+M=D&M
 `;
-    }
-  }
-}
+  },
+  or() {
+    return `// or
+@SP
+M=M-1
+A=M
+D=M
+@SP
+A=M-1
+M=D|M
+`;
+  },
+  not() {
+    return `// not
+@SP
+M=M-1
+A=M
+M=!M
+`;
+  },
+  neg() {
+    return `// neg
+@SP
+M=M-1
+A=M
+M=-M
+`;
+  },
+  eq(obj) {
+    return `// eq
+@SP
+M=M-1
+A=M-1
+D=M
+@SP
+A=M
+D=D-M
+@EQ1
+D;JEQ
+@SP
+A=M-1
+M=0
+
+(EQ${obj.eqCount++})
+@SP
+A=M-1
+M=-1
+`;
+  },
+  lt(obj) {
+    return `// lt
+@SP
+M=M-1
+A=M-1
+D=M
+@SP
+A=M
+D=D-M
+@LT1
+D;JLT
+@SP
+A=M-1
+M=0
+
+(LT${obj.ltCount++})
+@SP
+A=M-1
+M=-1
+`;
+  },
+  gt(obj) {
+    return `// gt
+@SP
+M=M-1
+A=M-1
+D=M
+@SP
+A=M
+D=D-M
+@GT1
+D;JGT
+@SP
+A=M-1
+M=0
+
+(GT${obj.gtCount++})
+@SP
+A=M-1
+M=-1
+`;
+  },
+};

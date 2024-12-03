@@ -1,6 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
 import CodeWriter from "../CodeWriter";
 
+vi.mock("fs", () => {
+  return { appendFileSync: vi.fn() };
+});
+
 describe("Code writer push", () => {
   it("return correct push local asm", () => {
     const codeWriter = new CodeWriter();

@@ -1,5 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import CodeWriter from "../CodeWriter";
+vi.mock("fs", () => {
+  return { appendFileSync: vi.fn() };
+});
 
 describe("Code Writer arithmetic", () => {
   it("return correct add asm", () => {
@@ -15,7 +18,7 @@ A=M-1
 M=D+M
 `);
   });
-  it.todo("return correct sub asm", () => {
+  it("return correct sub asm", () => {
     const codeWriter = new CodeWriter();
     const result = codeWriter.writeArithmetic("sub");
     expect(result).toBe(`// sub
@@ -28,7 +31,7 @@ A=M-1
 M=D-M
 `);
   });
-  it.todo("return correct and asm", () => {
+  it("return correct and asm", () => {
     const codeWriter = new CodeWriter();
     const result = codeWriter.writeArithmetic("and");
     expect(result).toBe(`// and
@@ -41,7 +44,7 @@ A=M-1
 M=D&M
 `);
   });
-  it.todo("return correct or asm", () => {
+  it("return correct or asm", () => {
     const codeWriter = new CodeWriter();
     const result = codeWriter.writeArithmetic("or");
     expect(result).toBe(`// or
@@ -54,20 +57,31 @@ A=M-1
 M=D|M
 `);
   });
-  it.todo("return correct eq asm", () => {
+  it("return correct eq asm", () => {
     const codeWriter = new CodeWriter();
+    codeWriter.writeArithmetic("eq");
     const result = codeWriter.writeArithmetic("eq");
     expect(result).toBe(`// eq
 @SP
 M=M-1
-A=M
+A=M-1
 D=M
 @SP
+A=M
+D=D-M
+@EQ1
+D;JEQ
+@SP
 A=M-1
-M=D|M
+M=0
+
+(EQ1)
+@SP
+A=M-1
+M=-1
 `);
   });
-  it.todo("return correct not asm", () => {
+  it("return correct not asm", () => {
     const codeWriter = new CodeWriter();
     const result = codeWriter.writeArithmetic("not");
     expect(result).toBe(`// not
@@ -77,7 +91,7 @@ A=M
 M=!M
 `);
   });
-  it.todo("return correct neg asm", () => {
+  it("return correct neg asm", () => {
     const codeWriter = new CodeWriter();
     const result = codeWriter.writeArithmetic("neg");
     expect(result).toBe(`// neg
@@ -87,5 +101,52 @@ A=M
 M=-M
 `);
   });
-  it.todo("return correct and asm");
+  it("return correct lt asm", () => {
+    const codeWriter = new CodeWriter();
+    codeWriter.writeArithmetic("lt");
+    const result = codeWriter.writeArithmetic("lt");
+    expect(result).toBe(`// lt
+@SP
+M=M-1
+A=M-1
+D=M
+@SP
+A=M
+D=D-M
+@LT1
+D;JLT
+@SP
+A=M-1
+M=0
+
+(LT1)
+@SP
+A=M-1
+M=-1
+`);
+  });
+  it("return correct gt asm", () => {
+    const codeWriter = new CodeWriter();
+    codeWriter.writeArithmetic("gt");
+    const result = codeWriter.writeArithmetic("gt");
+    expect(result).toBe(`// gt
+@SP
+M=M-1
+A=M-1
+D=M
+@SP
+A=M
+D=D-M
+@GT1
+D;JGT
+@SP
+A=M-1
+M=0
+
+(GT1)
+@SP
+A=M-1
+M=-1
+`);
+  });
 });
