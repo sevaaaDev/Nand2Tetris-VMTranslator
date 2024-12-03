@@ -23,7 +23,7 @@ const command = {
 export default class Parser {
   constructor(file) {
     this.fileLine = new nReadLines(file);
-    this.currentCommand = this.fileLine.next().split(" ");
+    this.currentCommand = this.fileLine.next().toString("ascii").split(" ");
   }
   commandType() {
     let type = command[this.currentCommand[0]];
@@ -34,11 +34,11 @@ export default class Parser {
   }
   #nextLine;
   hasMoreCommand() {
-    let nextLine = this.fileLine.next();
+    let nextLine = this.fileLine.next().toString("ascii");
     while (nextLine === "") {
-      nextLine = this.fileLine.next();
+      nextLine = this.fileLine.next().toString("ascii");
     }
-    if (nextLine) {
+    if (nextLine !== "false") {
       this.#nextLine = nextLine.split(" ");
       return true;
     }
