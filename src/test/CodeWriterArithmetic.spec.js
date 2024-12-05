@@ -23,12 +23,12 @@ M=D+M
     const result = codeWriter.writeArithmetic("sub");
     expect(result).toBe(`// sub
 @SP
-M=M-1
-A=M
+AM=M-1
 D=M
 @SP
 A=M-1
 M=D-M
+M=-M
 `);
   });
   it("return correct and asm", () => {
@@ -36,8 +36,7 @@ M=D-M
     const result = codeWriter.writeArithmetic("and");
     expect(result).toBe(`// and
 @SP
-M=M-1
-A=M
+AM=M-1
 D=M
 @SP
 A=M-1
@@ -49,8 +48,7 @@ M=D&M
     const result = codeWriter.writeArithmetic("or");
     expect(result).toBe(`// or
 @SP
-M=M-1
-A=M
+AM=M-1
 D=M
 @SP
 A=M-1
@@ -74,11 +72,14 @@ D;JEQ
 @SP
 A=M-1
 M=0
+@END_EQ1
+0;JMP
 
 (EQ1)
 @SP
 A=M-1
 M=-1
+(END_EQ1)
 `);
   });
   it("return correct not asm", () => {
@@ -86,8 +87,7 @@ M=-1
     const result = codeWriter.writeArithmetic("not");
     expect(result).toBe(`// not
 @SP
-M=M-1
-A=M
+A=M-1
 M=!M
 `);
   });
@@ -96,8 +96,7 @@ M=!M
     const result = codeWriter.writeArithmetic("neg");
     expect(result).toBe(`// neg
 @SP
-M=M-1
-A=M
+A=M-1
 M=-M
 `);
   });
@@ -118,11 +117,14 @@ D;JLT
 @SP
 A=M-1
 M=0
+@END_LT1
+0;JMP
 
 (LT1)
 @SP
 A=M-1
 M=-1
+(END_LT1)
 `);
   });
   it("return correct gt asm", () => {
@@ -142,11 +144,14 @@ D;JGT
 @SP
 A=M-1
 M=0
+@END_GT1
+0;JMP
 
 (GT1)
 @SP
 A=M-1
 M=-1
+(END_GT1)
 `);
   });
 });

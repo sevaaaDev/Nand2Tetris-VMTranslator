@@ -3,7 +3,7 @@ import Parser from "../Parser.js";
 
 vi.mock("n-readlines", () => {
   const nReadLines = vi.fn(function (cmd) {
-    this.array = [...cmd, false];
+    this.array = [...cmd, "false"];
     this.count = 0;
   });
 
@@ -39,8 +39,6 @@ describe("Parser", () => {
   });
   it("return false when file end", () => {
     const parser = new Parser(["add"]);
-    parser.hasMoreCommand();
-    parser.advance();
     expect(parser.hasMoreCommand()).toBe(false);
   });
   it("return the correct arg1", () => {
