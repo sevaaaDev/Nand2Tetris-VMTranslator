@@ -1,4 +1,5 @@
 import nReadLines from "n-readlines";
+import trim from "./trim";
 
 const C_ARITHMETIC = "C_ARITHMETIC";
 const C_PUSH = "C_PUSH";
@@ -23,7 +24,9 @@ const command = {
 export default class Parser {
   constructor(file) {
     this.fileLine = new nReadLines(file);
-    this.currentCommand = this.fileLine.next().toString("ascii").split(" ");
+    // this.currentCommand = this.fileLine.next().toString("ascii").split(" ");
+    this.currentCommand = "";
+    this.hasMoreCommand() && this.advance();
   }
   commandType() {
     let type = command[this.currentCommand[0]];
@@ -35,6 +38,7 @@ export default class Parser {
   #nextLine;
   hasMoreCommand() {
     let nextLine = this.fileLine.next().toString("ascii");
+    nextLine = trim.whitespace(trim.comment(nextLine));
     while (nextLine === "") {
       nextLine = this.fileLine.next().toString("ascii");
     }
