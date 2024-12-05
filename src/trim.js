@@ -1,6 +1,9 @@
 class Trim {
   comment(line) {
     let commentIndex = line.indexOf("//");
+    if (commentIndex === -1) {
+      commentIndex = line.length;
+    }
     return line.slice(0, commentIndex).trim();
   }
   label(line) {

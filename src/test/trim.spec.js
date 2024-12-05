@@ -6,6 +6,11 @@ describe("trim", () => {
     let trimmed = trim.comment(line);
     expect(trimmed).toBe("");
   });
+  it("trim whitespace when comment empty", () => {
+    let line = "real text    ";
+    let trimmed = trim.whitespace(trim.comment(line));
+    expect(trimmed).toBe("real text");
+  });
   it("removes inline comment", () => {
     let line = "D=D+1   // this is a comment";
     let trimmed = trim.comment(line);
