@@ -219,8 +219,7 @@ M=-M
   and() {
     return `// and
 @SP
-M=M-1
-A=M
+AM=M-1
 D=M
 @SP
 A=M-1
