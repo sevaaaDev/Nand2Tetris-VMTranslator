@@ -26,9 +26,28 @@ describe("commandType", () => {
     const parser = new Parser(["add"]);
     expect(parser.commandType()).toBe("C_ARITHMETIC");
   });
-  it.todo("return function command");
-  it.todo("return return command");
-  it.todo("return call command");
-  it.todo("return goto command");
-  it.todo("return label command");
+  it("return function command", () => {
+    const parser = new Parser(["function Foo 2"]);
+    expect(parser.commandType()).toBe("C_FUNCTION");
+  });
+  it("return return command", () => {
+    const parser = new Parser(["return"]);
+    expect(parser.commandType()).toBe("C_RETURN");
+  });
+  it("return call command", () => {
+    const parser = new Parser(["call Foo"]);
+    expect(parser.commandType()).toBe("C_CALL");
+  });
+  it("return goto command", () => {
+    const parser = new Parser(["goto END"]);
+    expect(parser.commandType()).toBe("C_GOTO");
+  });
+  it("return label command", () => {
+    const parser = new Parser(["label FOO "]);
+    expect(parser.commandType()).toBe("C_LABEL");
+  });
+  it("return if command", () => {
+    const parser = new Parser(["if-goto FOO"]);
+    expect(parser.commandType()).toBe("C_IF");
+  });
 });

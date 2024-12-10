@@ -18,9 +18,26 @@ const command = {
   pop() {
     return C_POP;
   },
-
-  // return, function, label, goto, call, if
+  goto() {
+    return C_GOTO;
+  },
+  [`if-goto`]() {
+    return C_IF;
+  },
+  label() {
+    return C_LABEL;
+  },
+  return() {
+    return C_RETURN;
+  },
+  call() {
+    return C_CALL;
+  },
+  function() {
+    return C_FUNCTION;
+  },
 };
+
 export default class Parser {
   constructor(file) {
     this.fileLine = new nReadLines(file);
@@ -52,21 +69,20 @@ export default class Parser {
     this.currentCommand = this.#nextLine;
   }
   arg1() {
+    if (this.commandType() === C_RETURN) {
+      throw "parser.arg1 called in C_RETURN";
+    }
     if (this.commandType() === C_ARITHMETIC) {
       return this.currentCommand[0];
     }
     return this.currentCommand[1];
   }
   arg2() {
-    if (this.commandType() === C_ARITHMETIC) {
-      return;
-    }
-    if (this.commandType() === C_PUSH) {
+    let allowed = [C_POP, C_PUSH, C_FUNCTION, C_CALL];
+    if (allowed.includes(this.commandType())) {
       return +this.currentCommand[2];
     }
-    if (this.commandType() === C_POP) {
-      return +this.currentCommand[2];
-    }
+    throw "parser.arg2 called in not allowed type";
   }
 }
 // Parser
