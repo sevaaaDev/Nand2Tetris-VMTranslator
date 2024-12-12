@@ -1,12 +1,38 @@
 import { appendFileSync } from "fs";
 export default class CodeWriter {
+  eqCount = 0;
+  ltCount = 0;
+  gtCount = 0;
   constructor(OutFile) {
-    this.fileName = OutFile;
+    this.outFile = OutFile;
+    this.currentFileName = OutFile;
+    this.currentFunction = "";
+    this.returnIndex = 1;
+  }
+  setFileName(name) {
+    this.currentFileName = name;
+  }
+  writeInit() {
+    let line = `// sys.init
+@256
+D=A
+@SP
+M=D
+
+@Sys.init
+0;JMP
+`;
+    try {
+      appendFileSync(this.outFile, line, "utf-8");
+    } catch (err) {
+      throw err;
+    }
+    return line;
   }
   writePushPop(command, segment, index) {
-    let line = getAssembly[command](segment, index, this.fileName);
+    let line = getAssembly[command](segment, index, this.outFile);
     try {
-      appendFileSync(this.fileName, line, "utf-8");
+      appendFileSync(this.outFile, line, "utf-8");
     } catch (err) {
       throw err;
     }
@@ -15,15 +41,177 @@ export default class CodeWriter {
   writeArithmetic(command) {
     let line = getAssemblyArithmetic[command](this);
     try {
-      appendFileSync(this.fileName, line, "utf-8");
+      appendFileSync(this.outFile, line, "utf-8");
     } catch (err) {
       throw err;
     }
     return line;
   }
-  eqCount = 0;
-  ltCount = 0;
-  gtCount = 0;
+  writeGoto(label) {
+    let correctLabel = `${this.currentFileName}.${this.currentFunction}$${label}`;
+    let line = `// goto ${label}
+@${correctLabel}
+0;JMP
+`;
+    try {
+      appendFileSync(this.outFile, line, "utf-8");
+    } catch (err) {
+      throw err;
+    }
+    return line;
+  }
+  writeIf(label) {
+    let correctLabel = `${this.currentFileName}.${this.currentFunction}$${label}`;
+    let line = `// if-goto ${label}
+@SP
+A=M-1
+D=M+1
+@${correctLabel}
+D;JEQ
+`;
+    try {
+      appendFileSync(this.outFile, line, "utf-8");
+    } catch (err) {
+      throw err;
+    }
+    return line;
+  }
+  writeLabel(label) {
+    let correctLabel = `${this.currentFileName}.${this.currentFunction}$${label}`;
+    let line = `// label ${label}
+(${correctLabel})
+`;
+    try {
+      appendFileSync(this.outFile, line, "utf-8");
+    } catch (err) {
+      throw err;
+    }
+    return line;
+  }
+  writeFunction(name, nvars) {
+    this.currentFunction = name;
+    this.returnIndex = 1;
+    let pushN = "";
+    for (let i = 0; i < nvars; i++) {
+      pushN += "\n@SP\nM=M+1\nA=M-1\nM=0";
+    }
+    let line = `// function ${name} ${nvars}
+(Main.main)${pushN}
+`;
+    try {
+      appendFileSync(this.outFile, line, "utf-8");
+    } catch (err) {
+      throw err;
+    }
+    return line;
+  }
+  writeCall(name, nargs) {
+    let line = `// call ${name} ${nargs}
+@${this.currentFunction}$ret.${this.returnIndex}
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@LCL
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@ARG
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@THIS
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@THAT
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@SP
+D=M
+@7
+D=D-A
+@ARG
+M=D
+@SP
+D=M
+@LCL
+M=D
+@${name}
+0;JMP
+(${this.currentFunction}$ret.${this.returnIndex++})
+`;
+    try {
+      appendFileSync(this.outFile, line, "utf-8");
+    } catch (err) {
+      throw err;
+    }
+    return line;
+  }
+  writeReturn() {
+    this.currentFunction = "";
+    let line = `// return
+@LCL
+D=M
+@R13
+M=D
+@5
+D=D-A
+A=D
+D=M
+@R14
+M=D
+@SP
+A=M-1
+D=M
+@ARG
+M=D
+@ARG
+D=A
+@SP
+M=D+1
+@R13
+MD=M-1
+@THAT
+M=D
+@R13
+MD=M-1
+@THIS
+M=D
+@R13
+MD=M-1
+@ARG
+M=D
+@R13
+MD=M-1
+@LCL
+M=D
+@R14
+A=M
+0;JMP
+`;
+    try {
+      appendFileSync(this.outFile, line, "utf-8");
+    } catch (err) {
+      throw err;
+    }
+    return line;
+  }
 }
 
 const getSegment = {
