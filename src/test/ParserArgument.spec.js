@@ -34,9 +34,32 @@ describe("Argument", () => {
     const parser = new Parser(["add"]);
     expect(parser.arg1()).toBe("add");
   });
-  it.todo("return function command");
-  it.todo("return return command");
-  it.todo("return call command");
-  it.todo("return goto command");
-  it.todo("return label command");
+  it("return label of goto command", () => {
+    const parser = new Parser(["goto LABEL"]);
+    expect(parser.arg1()).toBe("LABEL");
+  });
+  it("return label of if command", () => {
+    const parser = new Parser(["if-goto LABEL"]);
+    expect(parser.arg1()).toBe("LABEL");
+  });
+  it("return label name of label command", () => {
+    const parser = new Parser(["label LABEL"]);
+    expect(parser.arg1()).toBe("LABEL");
+  });
+  it("return func name function command", () => {
+    const parser = new Parser(["function Foo 0"]);
+    expect(parser.arg1()).toBe("Foo");
+  });
+  it("return total local var of function command", () => {
+    const parser = new Parser(["function Foo 0"]);
+    expect(parser.arg2()).toBe(0);
+  });
+  it("return func name from call command", () => {
+    const parser = new Parser(["call Foo 2"]);
+    expect(parser.arg1()).toBe("Foo");
+  });
+  it("return total arg from call command", () => {
+    const parser = new Parser(["call Foo 2"]);
+    expect(parser.arg2()).toBe(2);
+  });
 });
