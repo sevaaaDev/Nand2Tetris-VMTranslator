@@ -1,5 +1,5 @@
 import nReadLines from "n-readlines";
-import trim from "./trim";
+import trim from "./trim.js";
 
 const C_ARITHMETIC = "C_ARITHMETIC";
 const C_PUSH = "C_PUSH";
@@ -58,6 +58,7 @@ export default class Parser {
     nextLine = trim.whitespace(trim.comment(nextLine));
     while (nextLine === "") {
       nextLine = this.fileLine.next().toString("ascii");
+      nextLine = trim.whitespace(trim.comment(nextLine));
     }
     if (nextLine !== "false") {
       this.#nextLine = nextLine.split(" ");

@@ -64,10 +64,10 @@ M=D
     let correctLabel = `${this.currentFileName}.${this.currentFunction}$${label}`;
     let line = `// if-goto ${label}
 @SP
-A=M-1
-D=M+1
+AM=M-1
+D=M
 @${correctLabel}
-D;JEQ
+D;JNE
 `;
     try {
       appendFileSync(this.outFile, line, "utf-8");
@@ -96,7 +96,7 @@ D;JEQ
       pushN += "\n@SP\nM=M+1\nA=M-1\nM=0";
     }
     let line = `// function ${name} ${nvars}
-(Main.main)${pushN}
+(${name})${pushN}
 `;
     try {
       appendFileSync(this.outFile, line, "utf-8");
@@ -105,46 +105,33 @@ D;JEQ
     }
     return line;
   }
+  push() {
+    return `@SP
+A=M
+M=D
+@SP
+M=M+1`;
+  }
   writeCall(name, nargs) {
     let line = `// call ${name} ${nargs}
 @${this.currentFunction}$ret.${this.returnIndex}
 D=A
-@SP
-A=M
-M=D
-@SP
-M=M+1
+${this.push()}
 @LCL
-D=A
-@SP
-A=M
-M=D
-@SP
-M=M+1
+D=M
+${this.push()}
 @ARG
-D=A
-@SP
-A=M
-M=D
-@SP
-M=M+1
+D=M
+${this.push()}
 @THIS
-D=A
-@SP
-A=M
-M=D
-@SP
-M=M+1
+D=M
+${this.push()}
 @THAT
-D=A
-@SP
-A=M
-M=D
-@SP
-M=M+1
+D=M
+${this.push()}
 @SP
 D=M
-@7
+@${5 + nargs}
 D=D-A
 @ARG
 M=D
@@ -180,25 +167,30 @@ M=D
 A=M-1
 D=M
 @ARG
+A=M
 M=D
 @ARG
-D=A
+D=M
 @SP
 M=D+1
 @R13
-MD=M-1
+AM=M-1
+D=M
 @THAT
 M=D
 @R13
-MD=M-1
+AM=M-1
+D=M
 @THIS
 M=D
 @R13
-MD=M-1
+AM=M-1
+D=M
 @ARG
 M=D
 @R13
-MD=M-1
+AM=M-1
+D=M
 @LCL
 M=D
 @R14
