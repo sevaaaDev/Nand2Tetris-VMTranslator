@@ -1,20 +1,42 @@
 import CodeWriter from "./src/CodeWriter.js";
 import Parser from "./src/Parser.js";
 import { argv } from "process";
+import fs from "fs";
+import path from "path";
 
 function main() {
   let input = argv[2];
   let output = argv[3];
+  let isDirectory = false;
+  try {
+    isDirectory = fs.statSync(input).isDirectory();
+  } catch (err) {
+    throw err;
+  }
   if (!output.includes(".asm")) {
     output = output + ".asm";
   }
-  if (!input.includes(".vm")) {
+  if (!input.includes(".vm") && !isDirectory) {
     throw "Input file doesnt have .vm extension";
   }
-
-  const parser = new Parser(input);
   const codeWriter = new CodeWriter(output);
   codeWriter.writeInit();
+  if (isDirectory) {
+    let contents = fs.readdirSync(input).map((c) => path.join(input, c));
+    contents
+      .filter((c) => !fs.statSync(c).isDirectory())
+      .forEach(
+        (c) =>
+          codeWriter.setFileName(path.basename(c)) ||
+          handleOneFile(c, codeWriter),
+      );
+    return;
+  }
+  handleOneFile(input, codeWriter);
+}
+
+function handleOneFile(input, codeWriter) {
+  const parser = new Parser(input);
   while (true) {
     let type = parser.commandType();
     console.log(parser.currentCommand);
