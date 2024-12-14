@@ -30,7 +30,7 @@ M=D
     return line;
   }
   writePushPop(command, segment, index) {
-    let line = getAssembly[command](segment, index, this.outFile);
+    let line = getAssembly[command](segment, index, this.currentFileName);
     try {
       appendFileSync(this.outFile, line, "utf-8");
     } catch (err) {
@@ -151,7 +151,6 @@ M=D
     return line;
   }
   writeReturn() {
-    this.currentFunction = "";
     let line = `// return
 @LCL
 D=M
